@@ -1,0 +1,56 @@
+model: "Intel/Qwen3.5-122B-A10B-int4-AutoRound"
+api_key: test-key-123
+base_url: http://192.168.88.12:8001/v1
+
+logging:
+  level: info
+
+common_system_prompt: |
+  You are a code reviewer. Think step-by-step but be concise.
+  
+  Output format:
+  1. Brief analysis (2-3 sentences)
+  2. Issues list (max 5)
+  
+  Tool output format:
+  - `called: <tool_name>` and `status: <success|error>`
+  - Multiline results in `=== START ===` / `=== END ===`
+  - Ignore line number metadata `[<number>]` in analysis
+
+flows:
+  review:
+    name: "review"
+    description: "Review file for issues"
+    system_prompt: |
+      You are a code reviewer. Follow this process:
+      
+      1. FIRST: Read plan.md to understand the project specification and requirements
+      2. THEN: Explore any files you need to understand the target file's context
+      3. FINALLY: Analyze the target file for bugs
+      
+      You have access to:
+      - read_file: Read file content
+      - list_dir: List directory contents
+      - grep: Search for patterns
+      
+      Output format:
+      [SEVERITY]filename:line: issue - brief fix
+      
+      Rules:
+      - Read plan.md first for project context
+      - Explore related files as needed
+      - Think systematically
+      - Only report confirmed bugs
+      - Max 5 issues
+    user_prompt: |
+      Review {{file_path}}. Start by reading plan.md, then explore as needed, then find bugs.
+
+    tools:
+      - read_file
+      - grep
+      - list_dir
+    arguments:
+      - name: file_path
+        description: "Path to the file to review and fix"
+        required: true
+

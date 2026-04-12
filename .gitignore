@@ -1,0 +1,46 @@
+# Rust build artifacts
+/target/
+**/target/
+debug/
+release/
+
+# Generated files
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+*.gcov
+*.gcda
+*.gcno
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+
+# Build outputs (if not using target/)
+*.dll
+*.so
+*.dylib
+
+# Rust analyzer
+.rust-analyzer/

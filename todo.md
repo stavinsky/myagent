@@ -1,0 +1,19 @@
+ - chat
+ - subagent flow 
+ - limit file size when reading in read_file or grep 
+ - config
+    - configure list or pattern of protected files  (grep, edit, read)
+    - store key more privately 
+ - custom user provided tools wrappers for command line tools 
+ - ValidPath as_str should return optimized path but relative to base dir 
+ - client.rs
+    - batch fails on single tool error. 
+ - install script with config 
+ - prompts improvements:  
+    - multiple files to review and edit
+    - commit_review - respect staged. 
+ - implement other question types 
+ - end to end tests for each tool
+ - edit_file 
+     - handle /r/n  
+
