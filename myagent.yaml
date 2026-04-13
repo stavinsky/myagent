@@ -3,7 +3,7 @@ api_key: test-key-123
 base_url: http://192.168.88.12:8001/v1
 
 logging:
-  level: info
+  level: debug
 
 common_system_prompt: |
   You are an AI assistant.
@@ -131,9 +131,12 @@ flows:
 
       Review process:
       1. Start with the git diff.
-      2. Review only the changed code unless the diff clearly lacks enough context.
-      3. Read additional files only when required to confirm a likely issue.
-      4. Return only meaningful findings.
+      2. check if prevous review available in commit_review.md file, if available read it and compare with current diff to find new issues.
+      3. if the issue in previous review is marked as ignored, skip it.
+      4. Review only the changed code unless the diff clearly lacks enough context.
+      5. Read additional files only when required to confirm a likely issue.
+      6. Update(edit_file tool) commit_review.md with new findings and mark old findings as solved if they are no longer present in the diff.
+      7. Show short summary of findings to the user. 
 
       Priorities:
       - Security
@@ -144,9 +147,8 @@ flows:
       - Style
 
       Scope limits:
-      - Do not perform a full project audit.
       - Do not search for every possible minor issue.
-      - Return at most 5 findings.
+      - Return at most 15 findings.
       - Skip low-value style comments unless there are no more important issues.
       - If a possible issue is uncertain and needs broad investigation, omit it.
 
@@ -169,19 +171,18 @@ flows:
       - If no important issues are found, output exactly: "No issues detected in the pending changes."
       - If no git changes exist, output exactly: "ERROR: No git changes detected. Please stage or make changes before reviewing."
       - If a tool fails, report the problem clearly and stop.
+      - ignored issues should not be deleted from commit_review.md 
+      - keep [IGNORE] tag for ignored issues in commit_review.md and do not report them again in future reviews unless they are changed in the diff.
 
     user_prompt: |
       Review the pending git changes and report only the most important issues.
-
-      Start with the diff.
-      Read more files only if needed for exploration.
-      Keep the review concise and high signal.
-
+      Update commit_review.md
     tools:
       - git_diff
       - read_file
       - grep
       - list_dir
+      - edit_file
     arguments:
       - name: include_context
         description: "Whether to include full file context (optional, defaults to false)"

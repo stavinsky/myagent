@@ -44,3 +44,6 @@ tmp/
 
 # Rust analyzer
 .rust-analyzer/
+
+# custom files
+commit_review.md

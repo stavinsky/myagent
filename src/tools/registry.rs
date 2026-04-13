@@ -3,6 +3,7 @@
 //! This module provides a centralized registry for managing tool handlers.
 //! It handles tool registration, filtering, and execution.
 
+use crate::config::CustomTool;
 use crate::types::ToolHandler;
 use serde_json::Value;
 use async_openai::types::ChatCompletionTool;
@@ -15,7 +16,12 @@ pub struct ToolRegistry {
 impl ToolRegistry {
     /// Create a new ToolRegistry with all available tools
     pub fn new() -> Self {
-        let handlers: Vec<Box<dyn ToolHandler>> = vec![
+        Self::with_custom_tools(&std::collections::HashMap::new())
+    }
+
+    /// Create a new ToolRegistry with custom tools from config
+    pub fn with_custom_tools(custom_tools: &std::collections::HashMap<String, CustomTool>) -> Self {
+        let mut handlers: Vec<Box<dyn ToolHandler>> = vec![
             Box::new(crate::tools::read_file::ReadFileHandler),
             Box::new(crate::tools::edit_file::EditFileHandler::new()),
             Box::new(crate::tools::grep::GrepHandler),
@@ -27,7 +33,20 @@ impl ToolRegistry {
             Box::new(crate::tools::git::GitCommitHandler),
             Box::new(crate::tools::git::GitLogHandler),
         ];
-        
+
+        // Add custom tools from config
+        for (name, tool_config) in custom_tools {
+            handlers.push(Box::new(
+                crate::tools::custom_tools::CustomToolHandler::new(
+                    tool_config.name.clone(),
+                    tool_config.command.clone(),
+                    tool_config.description.clone(),
+                    tool_config.timeout,
+                )
+            ));
+            tracing::debug!("Registered custom tool: {}", name);
+        }
+
         Self { handlers }
     }
 
@@ -80,6 +99,7 @@ impl Default for ToolRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn test_registry_creation() {
@@ -92,5 +112,30 @@ mod tests {
         let registry = ToolRegistry::new();
         let result = registry.execute_tool("unknown_tool", &serde_json::json!({}), ".");
         assert!(result.contains("Unknown tool"));
+    }
+
+    #[test]
+    fn test_custom_tool_registry() {
+        let mut custom_tools = HashMap::new();
+        custom_tools.insert(
+            "cargo_test".to_string(),
+            crate::config::CustomTool {
+                name: "cargo_test".to_string(),
+                command: "echo 'test'".to_string(),
+                description: Some("Test command".to_string()),
+                timeout: 30,
+            },
+        );
+
+        let registry = ToolRegistry::with_custom_tools(&custom_tools);
+        
+        // Check that custom tool is registered
+        let tools = registry.get_tools(&["cargo_test".to_string()]);
+        assert_eq!(tools.len(), 1);
+        assert_eq!(tools[0].function.name, "cargo_test");
+        
+        // Check that built-in tools still work
+        let tools = registry.get_tools(&["read_file".to_string()]);
+        assert_eq!(tools.len(), 1);
     }
 }

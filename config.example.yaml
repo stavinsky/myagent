@@ -5,6 +5,20 @@ base_url: http://192.168.88.12:8001/v1
 logging:
   level: info
 
+custom_tools:
+  cargo_test:
+    name: "cargo_test"
+    command: "cargo test"
+    description: "Run cargo tests and filter output"
+    timeout: 60
+
+  cargo_build:
+    name: "cargo_build"
+    command: "cargo build"
+    description: "Build the cargo project"
+    timeout: 120
+
+
 common_system_prompt: |
   You are an AI assistant.
   Follow the current flow exactly.

@@ -1,3 +1,6 @@
+ - fix one line file output
+ - unify tool output metadata in result. text data in start/end block
+ - create_file or use edit_file to create file 
  - chat
  - subagent flow 
  - limit file size when reading in read_file or grep 

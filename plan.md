@@ -35,9 +35,9 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
 
 
 
-10. **Dependencies** — `clap` (derive), `serde` + `serde_yaml`, `async-openai`, `ratatui` + `crossterm`, `tokio`, `regex`, `anyhow`, `minijinja`, `tracing`, `tracing-subscriber`, `globwalk`, `dirs`.
+9. **Dependencies** — `clap` (derive), `serde` + `serde_yaml`, `async-openai`, `ratatui` + `crossterm`, `tokio`, `regex`, `anyhow`, `minijinja`, `tracing`, `tracing-subscriber`, `globwalk`, `dirs`.
 
-9. **Project structure** — `Cargo.toml`, `src/main.rs`, `src/client.rs`, `src/config.rs`, `src/flow.rs`, `src/tools/` (read_file, edit_file, grep, list_dir, multi_select, git_status, git_diff, git_stage, git_commit), `src/tui.rs`, `src/types.rs`, `config.example.yaml`, `Makefile`.
+10. **Project structure** — `Cargo.toml`, `src/main.rs`, `src/client.rs`, `src/config.rs`, `src/flow.rs`, `src/tools/` (read_file, edit_file, grep, list_dir, multi_select, git_status, git_diff, git_stage, git_commit), `src/tui.rs`, `src/types.rs`, `config.example.yaml`, `Makefile`.
 
 11. **Security** — Path traversal prevention with `--allowed-base` flag. Canonicalize paths and verify they start with allowed base. Block `..` references. **Symlink safety**: All paths (including symlink targets) are canonicalized and verified to remain within the allowed base. Symlinks are not followed by default in file traversal to prevent directory traversal attacks.
 
@@ -52,9 +52,30 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
     - Loops: `{% for item in items %}...{% endfor %}`
     - Safe and powerful templating instead of blind string replacement
 
-15. **Prompt preview** — `--print-prompt` flag renders and prints both the system prompt and user prompt with all variable substitutions and exits. Useful for debugging template issues.
+15. **Custom tools** — Users can define custom shell commands as tools in config.yaml under `custom_tools` key. Each custom tool:
+    - Has a fixed command defined in config (no shell injection possible)
+    - Accepts 3 optional arguments for output filtering (no defaults - returns all if not specified):
+      - `head_lines` (integer): Number of first N lines to return
+      - `tail_lines` (integer): Number of last N lines to return
+      - `pattern` (string): Regex pattern to filter output
+    - Executes in the allowed base directory
+    - Supports configurable timeout (default: 60s)
+    - Uses same logging pipeline as built-in tools
+    - Post-processes output with head/tail/grep filters
+    - The model can optionally use these arguments to filter large outputs
+    - Example:
+      ```yaml
+      custom_tools:
+        cargo_test:
+          name: "cargo_test"
+          command: "cargo test"
+          description: "Run cargo tests and filter output"
+          timeout: 60
+      ```
 
-16. **Structured tool responses** — All tool calls return structured feedback in format:
+16. **Prompt preview** — `--print-prompt` flag renders and prints both the system prompt and user prompt with all variable substitutions and exits. Useful for debugging template issues.
+
+17. **Structured tool responses** — All tool calls return structured feedback in format:
     ```
     called: <tool_name>
     status: success | error
@@ -71,11 +92,11 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
     ```
     This gives the model clear success/error status, metadata, and clear boundaries for the content.
 
-17. **Common system prompt** — A base system prompt that gets prepended to all flow-specific system prompts. Provides consistent behavior across all flows (e.g., "You are an AI assistant. Use tools appropriately. Return clear, concise responses."). Configurable in config.yaml.
+18. **Common system prompt** — A base system prompt that gets prepended to all flow-specific system prompts. Provides consistent behavior across all flows (e.g., "You are an AI assistant. Use tools appropriately. Return clear, concise responses."). Configurable in config.yaml.
 
-18. **Edit conflict prevention** — When the model requests multiple edits to the same file in a single response, later edits may reference incorrect line numbers due to shifts from earlier edits. The system must detect and prevent such conflicts, requiring the model to re-read the file before making conflicting edits.
+19. **Edit conflict prevention** — When the model requests multiple edits to the same file in a single response, later edits may reference incorrect line numbers due to shifts from earlier edits. The system must detect and prevent such conflicts, requiring the model to re-read the file before making conflicting edits.
 
-19. **Enhanced logging** — Tool calls log requested parameters at info level (file path and line ranges) and full parameters at debug level. Git operations include detailed error messages from stderr, stdout, or exit codes.
+20. **Enhanced logging** — Tool calls log requested parameters at info level (file path and line ranges) and full parameters at debug level. Git operations include detailed error messages from stderr, stdout, or exit codes.
 
 ## Tools
 

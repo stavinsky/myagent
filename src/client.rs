@@ -35,11 +35,12 @@ impl OpenAIClient {
 
     pub async fn execute_flow(&self, flow: &Flow, user_prompt: &str, available_tools: &[String]) -> Result<String> {
         println!("Executing flow: {}", flow.name);
-        tracing::debug!("Flow description: {}", flow.description);
-        tracing::debug!("Available tools: {:?}", available_tools);
+        tracing::info!("Flow description: {}", flow.description);
+        tracing::info!("Available tools: {:?}", available_tools);
+        tracing::info!("Custom tools: {:?}", self.config.custom_tools.keys());
         
-        // Create tool registry and get tools
-        let registry = crate::tools::registry::ToolRegistry::new();
+        // Create tool registry with custom tools and get tools
+        let registry = crate::tools::registry::ToolRegistry::with_custom_tools(&self.config.custom_tools);
         let tools = registry.get_tools(available_tools);
         
         tracing::debug!("Flow {} initialized with {} tools", flow.name, tools.len());

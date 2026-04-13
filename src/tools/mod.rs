@@ -5,7 +5,9 @@
 //! - Editing files  
 //! - Searching files with regex patterns
 //! - Listing directory contents
+//! - Executing custom shell commands
 
+pub mod custom_tools;
 pub mod edit_file;
 pub mod git;
 pub mod grep;

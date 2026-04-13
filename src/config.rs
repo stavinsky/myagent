@@ -4,8 +4,22 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tracing::Level;
 use crate::types::Flow;
+use std::collections::HashMap;
 
 const APP_NAME: &str = "myagent";
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CustomTool {
+    pub name: String,
+    pub command: String,
+    pub description: Option<String>,
+    #[serde(default = "default_timeout")]
+    pub timeout: u64,
+}
+
+fn default_timeout() -> u64 {
+    60
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
@@ -23,6 +37,8 @@ pub struct Config {
     pub logging: Logging,
     #[serde(default)]
     pub common_system_prompt: Option<String>,
+    #[serde(default)]
+    pub custom_tools: HashMap<String, CustomTool>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -81,6 +97,7 @@ impl Default for Config {
             flows: std::collections::HashMap::new(),
             logging: Logging::default(),
             common_system_prompt: None,
+            custom_tools: std::collections::HashMap::new(),
         }
     }
 }
@@ -142,6 +159,7 @@ impl Config {
     }
 
     /// Merge another config into this one, with the other config taking priority
+    /// Custom tools from 'other' override those from 'self' if both have the same name
     fn merge(self, other: Config) -> Self {
         Config {
             model: if other.model.is_empty() { self.model } else { other.model },
@@ -155,6 +173,17 @@ impl Config {
                 other.logging
             },
             common_system_prompt: other.common_system_prompt.or(self.common_system_prompt),
+            // Merge custom_tools: other's tools override self's tools with the same name
+            custom_tools: if other.custom_tools.is_empty() {
+                self.custom_tools
+            } else if self.custom_tools.is_empty() {
+                other.custom_tools
+            } else {
+                // Merge both, with 'other' taking priority for duplicate names
+                let mut merged = self.custom_tools;
+                merged.extend(other.custom_tools);
+                merged
+            },
         }
     }
 
@@ -240,5 +269,41 @@ prompts:
         let config: Config = serde_yaml::from_str(config_content).unwrap();
         assert_eq!(config.model, "gpt-4o");
         assert_eq!(config.api_key, Some("test-key".to_string()));
+    }
+
+    #[test]
+    fn test_custom_tools_config() {
+        let config_content = r#"
+model: gpt-4o
+api_key: test-key
+logging:
+  level: info
+
+custom_tools:
+  cargo_test:
+    name: "cargo_test"
+    command: "cargo test"
+    description: "Run cargo tests"
+    timeout: 60
+  cargo_build:
+    name: "cargo_build"
+    command: "cargo build"
+    description: "Build the project"
+    timeout: 120
+"#;
+        let config: Config = serde_yaml::from_str(config_content).unwrap();
+        assert_eq!(config.model, "gpt-4o");
+        assert_eq!(config.custom_tools.len(), 2);
+        
+        let cargo_test = config.custom_tools.get("cargo_test").unwrap();
+        assert_eq!(cargo_test.name, "cargo_test");
+        assert_eq!(cargo_test.command, "cargo test");
+        assert_eq!(cargo_test.timeout, 60);
+        assert_eq!(cargo_test.description, Some("Run cargo tests".to_string()));
+        
+        let cargo_build = config.custom_tools.get("cargo_build").unwrap();
+        assert_eq!(cargo_build.name, "cargo_build");
+        assert_eq!(cargo_build.command, "cargo build");
+        assert_eq!(cargo_build.timeout, 120);
     }
 }

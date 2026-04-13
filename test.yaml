@@ -17,7 +17,36 @@ common_system_prompt: |
   - Multiline results in `=== START ===` / `=== END ===`
   - Ignore line number metadata `[<number>]` in analysis
 
+custom_tools:
+  cargo_test:
+    name: "cargo_test"
+    command: "cargo test"
+    description: "Run cargo tests and filter output"
+    timeout: 60
+
+  cargo_build:
+    name: "cargo_build"
+    command: "cargo build"
+    description: "Build the cargo project"
+    timeout: 120
+
+
 flows:
+  test_flow:
+    name: "test_flow"
+    description: "A flow to test the review process"
+    system_prompt: |
+        You are testing tools. 
+        If the requested tool is not working - exit and print the error.
+    user_prompt: |
+      Run cargo build and cargo test and report results.
+
+    tools:
+      - cargo_build
+      - cargo_test
+      
+      
+      
   review:
     name: "review"
     description: "Review file for issues"
