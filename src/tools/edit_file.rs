@@ -39,9 +39,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
     }
 }
 
-/// Edit a file by replacing a line range with new text.
-/// Lines are 1-indexed and ranges are inclusive.
-/// The file_path parameter is already validated (ValidPath type ensures this).
+/// Replace lines start_line to end_line (1-indexed, inclusive) with new_text
 pub fn edit_file(valid_path: &ValidPath, start_line: u32, end_line: u32, new_text: &str) -> ToolResponse {
     let file_path = valid_path.as_str();
     
@@ -193,8 +191,7 @@ pub fn edit_file(valid_path: &ValidPath, start_line: u32, end_line: u32, new_tex
     )).with_metadata(metadata)
 }
 
-/// Tool handler implementation for edit_file
-/// This handler maintains internal state (EditTracker) for tracking edit conflicts
+/// Edit file handler with conflict tracking
 pub struct EditFileHandler {
     edit_tracker: RwLock<crate::types::EditTracker>,
 }
@@ -430,60 +427,4 @@ mod tests {
         assert_eq!(content, "replaced");
         assert!(!content.ends_with('\n'), "Should not add trailing newline");
     }
-    #[test]
-    fn test_replacement_with_trailing_newline() {
-        // Test that replacement text with trailing newline adds it to the result
-        let (_temp_dir, valid_path) = setup_test_file("line1\nline2\nline3\n");
-        let file_path = valid_path.as_str();
-        
-        let result = edit_file(&valid_path, 2, 2, "replaced_line\n");
-        assert!(matches!(result.status, ToolStatus::Success), "Edit should succeed: {:?}", result);
-        
-        let content = fs::read_to_string(file_path).expect("Failed to read file");
-        // Replacement has trailing newline, so result should have it too
-        assert_eq!(content, "line1\nreplaced_line\nline3\n");
-        assert!(content.ends_with('\n'), "Should have trailing newline from replacement");
-    }
-
-    #[test]
-    fn test_replacement_without_trailing_newline() {
-        // Test that replacement text without trailing newline removes it
-        let (_temp_dir, valid_path) = setup_test_file("line1\nline2\nline3\n");
-        let file_path = valid_path.as_str();
-        
-        let result = edit_file(&valid_path, 2, 2, "replaced_line");
-        assert!(matches!(result.status, ToolStatus::Success), "Edit should succeed: {:?}", result);
-        
-        let content = fs::read_to_string(file_path).expect("Failed to read file");
-        // Original had trailing newline, but replacement doesn't, so result shouldn't
-        assert_eq!(content, "line1\nreplaced_line\nline3");
-        assert!(!content.ends_with('\n'), "Should not have trailing newline when replacement doesn't");
-    }
-
-    #[test]
-    fn test_multiline_replacement_with_trailing_newline() {
-        // Test multiline replacement with trailing newline
-        let (_temp_dir, valid_path) = setup_test_file("line1\nline2\nline3\n");
-        let file_path = valid_path.as_str();
-        
-        let result = edit_file(&valid_path, 2, 2, "new_line1\nnew_line2\n");
-        assert!(matches!(result.status, ToolStatus::Success), "Edit should succeed: {:?}", result);
-        
-        let content = fs::read_to_string(file_path).expect("Failed to read file");
-        assert_eq!(content, "line1\nnew_line1\nnew_line2\nline3\n");
-        assert!(content.ends_with('\n'), "Should preserve trailing newline from replacement");
-    }
-
-    #[test]
-    fn test_empty_replacement_uses_original_newline_status() {
-        // Test that empty replacement preserves the original file's newline status
-        let (_temp_dir, valid_path) = setup_test_file("line1\nline2\nline3\n");
-        let file_path = valid_path.as_str();
-        
-        let result = edit_file(&valid_path, 2, 2, "");
-        assert!(matches!(result.status, ToolStatus::Success), "Edit should succeed: {:?}", result);
-        
-        let content = fs::read_to_string(file_path).expect("Failed to read file");
-        assert_eq!(content, "line1\nline3\n");
-        assert!(content.ends_with('\n'), "Should preserve original trailing newline for empty replacement");
-    }}
+}

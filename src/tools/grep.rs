@@ -37,13 +37,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
     }
 }
 
-/// Search files using a regex pattern with glob path support
-/// 
-/// Parameters:
-/// - pattern: Regex pattern to search for
-/// - path: Optional glob pattern for file paths (e.g., "src/**/*.rs", "*.txt"). If None, searches all files recursively.
-/// 
-/// The path is validated against the allowed base to prevent directory traversal attacks.
+/// Search files using regex pattern with glob path support
 pub fn grep(pattern: &str, path: Option<&str>, allowed_base: &str) -> ToolResponse {
     tracing::info!("grep: pattern='{}', path='{}'", pattern, path.unwrap_or("*"));
     

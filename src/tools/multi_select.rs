@@ -53,8 +53,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
     }
 }
 
-/// Execute the multi_select tool - presents items in a TUI and collects user selection
-/// Returns a structured ToolResponse with formatted output
+/// Present items in TUI and collect user selection
 pub fn execute_multi_select(question: &str, items_json: &str, _question_type: &str) -> ToolResponse {
     tracing::info!("multi_select: {}", question);
     

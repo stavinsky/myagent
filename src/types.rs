@@ -58,12 +58,7 @@ impl EditTracker {
         }
     }
 
-    /// Check if an edit is safe and record it
-    /// Returns Ok(()) if the edit is safe, Err with message if it would conflict
-    /// 
-    /// The tracker stores the MINIMUM line position edited for each file.
-    /// If a new edit starts below (higher line number than) the minimum,
-    /// it will be affected by line shifts from previous edits.
+    /// Check if edit conflicts with previous edits and record it
     pub fn check_and_record_edit(&mut self, file_path: &str, start_line: u32, end_line: u32) -> Result<(), String> {
         if let Some(&min_position) = self.last_edits.get(file_path) {
             // If this edit starts below (higher line number than) the minimum edited position,

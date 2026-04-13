@@ -1,19 +1,14 @@
 use std::path::Path;
 
-/// A validated path that is guaranteed to be within the allowed base directory
-/// This type ensures path validation cannot be forgotten - it must be constructed
-/// through the `from_string` method which performs validation
+/// A validated path guaranteed to be within the allowed base directory
 #[derive(Debug, Clone)]
 pub struct ValidPath {
     inner: String, // Keep the original relative path as string
 }
 
 impl ValidPath {
-    /// Create a new ValidPath by validating the input string against the allowed base.
-    /// Returns an error if the path contains ".." or resolves to a path outside the allowed base.
-    /// 
-    /// Note: This function validates the path structure but does not check if the file/directory
-    /// actually exists. File existence should be checked separately when the path is used.
+    /// Create a new ValidPath by validating against the allowed base.
+    /// Returns an error if the path contains ".." or is outside the allowed base.
     pub fn from_string(path: &str, allowed_base: &str) -> Result<Self, String> {
         // Check for .. in the path BEFORE any other processing
         if path.contains("..") {

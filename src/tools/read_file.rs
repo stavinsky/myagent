@@ -36,16 +36,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
     }
 }
 
-/// Read the contents of a file by path with optional line range
-/// Returns a structured ToolResponse with formatted output
-/// The path parameter is already validated (ValidPath type ensures this)
-/// 
-/// Parameters:
-/// - file_path: Path to the file to read
-/// - start_line: Starting line number (1-indexed, optional, defaults to 1). Must be >= 1 if provided.
-/// - end_line: Ending line number (1-indexed, inclusive, optional, defaults to total lines). Must be >= 1 if provided.
-/// 
-/// This function does not panic. All invalid inputs are handled gracefully with error responses.
+/// Read file contents with optional line range (1-indexed)
 pub fn read_file(valid_path: &ValidPath, _allowed_base: &str, start_line: Option<u32>, end_line: Option<u32>) -> ToolResponse {
     let file_path = valid_path.as_str();
     

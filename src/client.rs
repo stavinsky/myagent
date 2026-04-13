@@ -115,21 +115,7 @@ impl OpenAIClient {
         Err(anyhow::anyhow!("Max iterations reached"))
     }
 
-    /// Process a batch of tool calls and add their responses to the messages.
-    /// 
-    /// This method iterates through tool calls from the LLM, executes each one using
-    /// the tool registry, and appends the results as tool messages to the conversation.
-    /// All tool calls in a batch are processed sequentially, with each response being
-    /// added to the messages for the next iteration.
-    /// 
-    /// # Arguments
-    /// * `tool_calls` - The batch of tool calls to process
-    /// * `messages` - Mutable reference to the messages vector where responses will be added
-    /// * `registry` - The tool registry used to execute the tool calls
-    /// 
-    /// # Returns
-    /// * `Ok(())` if all tool calls were processed successfully
-    /// * `Err` if any tool call failed to parse or execute
+    /// Process tool calls and add responses to messages
     fn process_tool_calls(
         &self,
         tool_calls: &[async_openai::types::ChatCompletionMessageToolCall],

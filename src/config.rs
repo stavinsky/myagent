@@ -103,8 +103,7 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Get default config paths in order of priority
-    /// Returns (user_config_path, local_config_path)
+    /// Get default config paths (user, then local)
     pub fn get_default_paths() -> (PathBuf, PathBuf) {
         let home_dir = dirs::home_dir()
             .unwrap_or_else(|| PathBuf::from("."));

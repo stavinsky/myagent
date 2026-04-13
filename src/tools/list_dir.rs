@@ -26,9 +26,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
     }
 }
 
-/// List contents of a directory
-/// Returns a structured ToolResponse with formatted output
-/// The dir_path parameter is already validated (ValidPath type ensures this)
+/// List directory contents
 pub fn list_dir(valid_dir_path: &ValidPath, _allowed_base: &str) -> ToolResponse {
     let dir_path = valid_dir_path.as_str();
     tracing::info!("list_dir: {}", dir_path);
