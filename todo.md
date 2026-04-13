@@ -1,5 +1,3 @@
- - fix one line file output
- - unify tool output metadata in result. text data in start/end block
  - create_file or use edit_file to create file 
  - chat
  - subagent flow 
@@ -11,7 +9,6 @@
  - ValidPath as_str should return optimized path but relative to base dir 
  - client.rs
     - batch fails on single tool error. 
- - install script with config 
  - prompts improvements:  
     - multiple files to review and edit
     - commit_review - respect staged. 
