@@ -16,10 +16,8 @@ common_system_prompt: |
   Keep outputs short and well structured.
   Tool output format is structured plain text:
   - First lines are: `called: <tool_name>` and `status: <success|error>`.
-  - Single-line results are returned as: `result: <value>`.
-  - Multiline results use markers instead of inline `result:` content.
-  - If metadata is present for a multiline result, it appears as: `result: [<metadata>]`.
-  - Multiline payloads are wrapped exactly like this:
+  - Metadata line (when applicable): `metadata: <metadata>` provides context like file size, line counts, or match counts.
+  - All outputs use START/END markers for consistent formatting:
     === START ===
     <tool output content>
     === END ===
@@ -252,3 +250,16 @@ flows:
       - name: file_path
         description: "Path to the file to clean up"
         required: true
+
+custom_tools:
+  cargo_test:
+    name: "cargo_test"
+    command: "cargo test"
+    description: "Run cargo tests and filter output"
+    timeout: 60
+
+  cargo_build:
+    name: "cargo_build"
+    command: "cargo build"
+    description: "Build the cargo project"
+    timeout: 120

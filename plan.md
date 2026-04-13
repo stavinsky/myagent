@@ -75,22 +75,16 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
 
 16. **Prompt preview** — `--print-prompt` flag renders and prints both the system prompt and user prompt with all variable substitutions and exits. Useful for debugging template issues.
 
-17. **Structured tool responses** — All tool calls return structured feedback in format:
+17. **Structured tool responses** — All tool calls return structured feedback in a format:
     ```
     called: <tool_name>
     status: success | error
-    result: <output>
-    ```
-    For any multiline results (output containing newlines), use START/END markers with metadata:
-    ```
-    called: <tool_name>
-    status: success
-    result: [FILE: filename.rs - 2847 bytes]
+    metadata: <metadata> (always included when applicable)
     === START ===
-    [full file content]
+    [full output content]
     === END ===
     ```
-    This gives the model clear success/error status, metadata, and clear boundaries for the content.
+    The format is consistent regardless of output size (single line or multi-line). Metadata provides context such as file size, line counts, or other relevant information. The START/END markers provide clear boundaries for the content, making it easy for the model to parse.
 
 18. **Common system prompt** — A base system prompt that gets prepended to all flow-specific system prompts. Provides consistent behavior across all flows (e.g., "You are an AI assistant. Use tools appropriately. Return clear, concise responses."). Configurable in config.yaml.
 

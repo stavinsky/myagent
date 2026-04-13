@@ -72,7 +72,8 @@ impl CustomToolHandler {
         let processed_output = Self::post_process_output(&stdout, head_lines, tail_lines, &pattern);
 
         tracing::info!("custom_tool '{}': success", tool_name);
-        Ok(ToolResponse::success(tool_name, processed_output))
+        let metadata = format!("Command '{}' executed successfully ({} bytes)", command, processed_output.len());
+        Ok(ToolResponse::success(tool_name, processed_output).with_metadata(metadata))
     }
 
     /// Execute a command with a timeout using tokio

@@ -129,7 +129,7 @@ impl ToolResponse {
         self
     }
 
-    /// Format the response as structured output with START/END markers for multiline
+    /// Format the response as structured output with START/END markers
     pub fn format(&self) -> String {
         let status_str = match self.status {
             ToolStatus::Success => "success",
@@ -140,18 +140,16 @@ impl ToolResponse {
         output.push_str(&format!("called: {}\n", self.tool_name));
         output.push_str(&format!("status: {}\n", status_str));
 
-        // Check if result is multiline
-        if self.result.contains('\n') {
-            // Add metadata if available
-            if let Some(meta) = &self.metadata {
-                output.push_str(&format!("result: [{}]\n", meta));
-            }
-            output.push_str("=== START ===\n");
-            output.push_str(&self.result);
-            output.push_str("\n=== END ===\n");
-        } else {
-            output.push_str(&format!("result: {}\n", self.result));
+        if let Some(meta) = &self.metadata {
+            output.push_str(&format!("metadata: {}\n", meta));
         }
+        // IMPORTANT: we always put \n before the end marker. 
+        // This ensures that even if the result is empty, 
+        // the end marker is on a new line and can be reliably detected.
+        // If the file has \n it should not be lost. 
+        output.push_str("=== START ===\n");
+        output.push_str(&self.result);
+        output.push_str("\n=== END ===\n");
 
         output
     }
@@ -160,6 +158,65 @@ impl ToolResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_format_with_metadata() {
+        let response = ToolResponse::success("read_file", "file content".to_string())
+            .with_metadata("FILE: test.rs - 123 bytes".to_string());
+        
+        let formatted = response.format();
+        
+        assert!(formatted.contains("called: read_file"));
+        assert!(formatted.contains("status: success"));
+        assert!(formatted.contains("metadata: FILE: test.rs - 123 bytes"));
+        assert!(formatted.contains("=== START ==="));
+        assert!(formatted.contains("file content"));
+        assert!(formatted.contains("=== END ==="));
+    }
+
+    #[test]
+    fn test_format_without_metadata() {
+        let response = ToolResponse::success("echo", "Hello".to_string());
+        
+        let formatted = response.format();
+        
+        assert!(formatted.contains("called: echo"));
+        assert!(formatted.contains("status: success"));
+        assert!(!formatted.contains("metadata:"));
+        assert!(formatted.contains("=== START ==="));
+        assert!(formatted.contains("Hello"));
+        assert!(formatted.contains("=== END ==="));
+    }
+
+    #[test]
+    fn test_format_error() {
+        let response = ToolResponse::error("read_file", "File not found".to_string());
+        
+        let formatted = response.format();
+        
+        assert!(formatted.contains("called: read_file"));
+        assert!(formatted.contains("status: error"));
+        assert!(formatted.contains("=== START ==="));
+        assert!(formatted.contains("File not found"));
+        assert!(formatted.contains("=== END ==="));
+    }
+
+    #[test]
+    fn test_format_multiline() {
+        let response = ToolResponse::success("grep", "line1\nline2\nline3".to_string())
+            .with_metadata("3 matches".to_string());
+        
+        let formatted = response.format();
+        
+        assert!(formatted.contains("called: grep"));
+        assert!(formatted.contains("status: success"));
+        assert!(formatted.contains("metadata: 3 matches"));
+        assert!(formatted.contains("=== START ==="));
+        assert!(formatted.contains("line1"));
+        assert!(formatted.contains("line2"));
+        assert!(formatted.contains("line3"));
+        assert!(formatted.contains("=== END ==="));
+    }
 
     #[test]
     fn test_edit_tracker_new_edit() {
