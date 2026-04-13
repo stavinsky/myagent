@@ -21,7 +21,7 @@ common_system_prompt: |
     === START ===
     <tool output content>
     === END ===
-  When a tool returns multiline output, parse only the content between `=== START ===` and `=== END ===` as the main result body.
+  - Parse only the content between `=== START ===` and `=== END ===` as the main result body.
   - if you see [<number>] before each line it should be interpreted as line numbers and not part of the content. Line numbers are for reference and should not be included in your analysis or output.
   If you are changing file you have to read file before each edit to ensure you have the latest content and line numbers. Always be precise with line numbers when using edit_file, as they define the exact range to replace.
   if you are calling multiple edits in a row, you must sort these tools_calls in reverse order (starting with the edit that has the highest line numbers) to avoid line number shifts that can cause edits to be applied incorrectly.
