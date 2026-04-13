@@ -3,14 +3,13 @@ api_key: test-key-123
 base_url: http://192.168.88.12:8001/v1
 
 logging:
-  level: info
+  level: debug 
 
 common_system_prompt: |
   You are a code reviewer. Think step-by-step but be concise.
   
   Output format:
   1. Brief analysis (2-3 sentences)
-  2. Issues list (max 5)
   
   Tool output format:
   - `called: <tool_name>` and `status: <success|error>`
@@ -32,21 +31,58 @@ custom_tools:
 
 
 flows:
-  test_flow:
-    name: "test_flow"
+  test_edit1:
+    name: "test_edit1"
     description: "A flow to test the review process"
     system_prompt: |
         You are testing tools. 
         If the requested tool is not working - exit and print the error.
     user_prompt: |
-      Run cargo build and cargo test and report results.
+      1. read the file commit_review.md
+      2. add 2 lines. 
+        - Line 1: "This is a test line added by the agent."
+        - Line 2: "This line is added to verify the edit_file tool functionality."
+      3. read the file
+
 
     tools:
-      - cargo_build
-      - cargo_test
+      - edit_file
+      - read_file
+
+  test_edit2:
+    name: "test_edit2"
+    description: "A flow to test the tool calling process"
+    system_prompt: |
+        You are testing tools. 
+        If the requested tool is not working - exit and print the error.
+    user_prompt: |
+      1. read the file commit_review.md
+      2. make the file empty by deleting all lines
+
+
+    tools:
+      - edit_file
+      - read_file      
       
-      
-      
+  test_edit2:
+    name: "test_edit2"
+    description: "A flow to test the tool calling process"
+    system_prompt: |
+        You are testing tools. 
+        If the requested tool is not working - exit and print the error.
+    user_prompt: |
+      1. read the file commit_review.md
+      2. add 2 lines. 
+        - Line 1: "This is a test line added by the agent."
+        - Line 2: "This line is added to verify the edit_file tool functionality."
+      3. read the file
+      4. edit first line. Replace with "replaced first line"
+      5. read the file
+
+    tools:
+      - edit_file
+      - read_file      
+
   review:
     name: "review"
     description: "Review file for issues"

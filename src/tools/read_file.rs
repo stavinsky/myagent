@@ -84,7 +84,8 @@ pub fn read_file(valid_path: &ValidPath, _allowed_base: &str, start_line: Option
             tracing::debug!("read_file completed ({} bytes)", content.len());
             
             if content.is_empty() {
-                ToolResponse::success("read_file", "[EMPTY FILE] The file exists but contains no content.".to_string())
+                ToolResponse::success("read_file", String::new())
+                    .with_metadata(format!("[FILE: {} - 0 bytes] (empty file)", file_path))
             } else {
                 // Extract the requested line range
                 let lines: Vec<&str> = content.lines().collect();

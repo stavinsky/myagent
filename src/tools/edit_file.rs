@@ -94,21 +94,33 @@ pub fn edit_file(valid_path: &ValidPath, start_line: u32, end_line: u32, new_tex
     let total_lines = lines.len();
     
     // Validate line range
-    if start_line as usize > total_lines {
+    // Allow editing empty files: if file is empty (total_lines=0), allow start_line=1 to insert initial content
+    if total_lines > 0 && start_line as usize > total_lines {
         return ToolResponse::error(
             "edit_file",
             format!("Start line ({}) is beyond the end of the file ({} lines)", start_line, total_lines)
         );
     }
     
-    if end_line as usize > total_lines {
+    if total_lines > 0 && end_line as usize > total_lines {
         return ToolResponse::error(
             "edit_file",
             format!("End line ({}) is beyond the end of the file ({} lines)", end_line, total_lines)
         );
     }
     
-    let old_lines = &lines[(start_line as usize - 1)..end_line as usize];
+    // For empty files, allow end_line to be 0 (insert at start) or 1 (replace line 1 which doesn't exist yet)
+    let actual_end_line = if total_lines == 0 && end_line == 0 {
+        1 // Treat end_line=0 on empty file as end_line=1 for insertion
+    } else {
+        end_line
+    };
+    
+    let old_lines = if total_lines > 0 {
+        &lines[(start_line as usize - 1)..actual_end_line as usize]
+    } else {
+        &[]
+    };
     let old_text_preview = old_lines.iter().take(5).cloned().collect::<Vec<_>>().join("\n");
     let old_line_count = old_lines.len();
     
@@ -127,8 +139,11 @@ pub fn edit_file(valid_path: &ValidPath, start_line: u32, end_line: u32, new_tex
         new_lines.push(line.to_string());
     }
     
-    for i in end_line as usize..total_lines {
-        new_lines.push(lines[i].to_string());
+    // Only add remaining lines if file had content and we're not at the end
+    if total_lines > 0 && (actual_end_line as usize) < total_lines {
+        for i in actual_end_line as usize..total_lines {
+            new_lines.push(lines[i].to_string());
+        }
     }
     
     let mut new_content = new_lines.join("\n");

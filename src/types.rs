@@ -144,12 +144,15 @@ impl ToolResponse {
             output.push_str(&format!("metadata: {}\n", meta));
         }
         // IMPORTANT: we always put \n before the end marker. 
-        // This ensures that even if the result is empty, 
+        // This ensures that even if the file is empty, 
         // the end marker is on a new line and can be reliably detected.
         // If the file has \n it should not be lost. 
         output.push_str("=== START ===\n");
         output.push_str(&self.result);
-        output.push_str("\n=== END ===\n");
+        if  !self.result.is_empty() { 
+            output.push_str("\n");
+        }
+        output.push_str("=== END ===\n");
 
         output
     }
