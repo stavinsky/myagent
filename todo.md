@@ -1,6 +1,6 @@
- - create_file or use edit_file to create file 
  - chat
  - subagent flow 
+ - refactor and re-think cli interface
  - limit file size when reading in read_file or grep 
  - config
     - configure list or pattern of protected files  (grep, edit, read)

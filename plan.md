@@ -37,7 +37,7 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
 
 9. **Dependencies** — `clap` (derive), `serde` + `serde_yaml`, `async-openai`, `ratatui` + `crossterm`, `tokio`, `regex`, `anyhow`, `minijinja`, `tracing`, `tracing-subscriber`, `globwalk`, `dirs`.
 
-10. **Project structure** — `Cargo.toml`, `src/main.rs`, `src/client.rs`, `src/config.rs`, `src/flow.rs`, `src/tools/` (read_file, edit_file, grep, list_dir, multi_select, git_status, git_diff, git_stage, git_commit), `src/tui.rs`, `src/types.rs`, `config.example.yaml`, `Makefile`.
+10. **Project structure** — `Cargo.toml`, `src/main.rs`, `src/client.rs`, `src/config.rs`, `src/flow.rs`, `src/tools/` (read_file, edit_file, create_file, delete_file, remove_dir, grep, list_dir, multi_select, git_status, git_diff, git_stage, git_commit), `src/tui.rs`, `src/types.rs`, `config.example.yaml`, `Makefile`.
 
 11. **Security** — Path traversal prevention with `--allowed-base` flag. Canonicalize paths and verify they start with allowed base. Block `..` references. **Symlink safety**: All paths (including symlink targets) are canonicalized and verified to remain within the allowed base. Symlinks are not followed by default in file traversal to prevent directory traversal attacks.
 
@@ -97,6 +97,9 @@ Build `myagent` — a Rust CLI tool that executes configurable workflows (flows)
 Model-accessible tools:
 - `read_file(file_path, start_line?, end_line?)` — Read file with optional line range (start_line and end_line are 1-indexed). **Maximum 2000 lines are returned; larger requests are automatically truncated**. Output format: `[line-number]content` with no extra spaces. Empty files return success with "[EMPTY FILE]" message, not an error. Metadata includes actual file size in bytes and indicates when content is truncated.
 - `edit_file(file_path, start_line, end_line, new_text)` — Replace lines start_line to end_line (1-indexed, inclusive) with new_text
+- `create_file(file_path, content?)` — Create a new file with optional content. Fails if file already exists. Creates parent directories if needed.
+- `delete_file(file_path)` — Delete a file. Fails if file doesn't exist or is a directory.
+- `remove_dir(dir_path)` — Remove an empty directory. Fails if directory doesn't exist or is a file.
 - `grep(pattern, path?)` — Search files using a regex pattern. The `path` argument supports glob patterns (e.g., `src/**/*.rs`, `*.txt`) for flexible file matching. Searches are limited to 100,000 files and 100 directory levels. Symlinks are not followed for security. Path is validated against the allowed base to prevent directory traversal.
 - `list_dir(dir_path)` — List directory
 - `quiz(question, suggestions[], question_type)` — TUI multi-select for user input
@@ -149,6 +152,9 @@ flows:
     tools:
       - read_file
       - edit_file
+      - create_file
+      - delete_file
+      - remove_dir
       - quiz
       - grep
       - list_dir
@@ -175,6 +181,9 @@ flows:
       - git_stage
       - git_commit
       - read_file
+      - create_file
+      - delete_file
+      - remove_dir
     arguments:
       - name: file_path
         description: "Path to the file to commit"
@@ -231,28 +240,3 @@ User prompts support variable substitution:
 - `--list-flows` displays all available flows with descriptions and arguments
 - `--check-config` validates config structure and reports issues
 
-## Implementation Steps
-1. Update types.rs with Flow struct (name, description, system_prompt, user_prompt, tools, arguments)
-2. Create flow.rs module with flow execution logic
-3. Update config.rs to parse flow definitions with proper structure
-4. Add git tools: git_status, git_diff, git_stage, git_commit
-5. Update client.rs with flow-based execution using system/user prompts
-6. Update CLI in main.rs with:
-   - `--flow <name>` flag (optional, defaults to "review_and_fix")
-   - `--list-flows` flag to show available flows
-   - `--check-config` flag to validate configuration
-   - Flow arguments as positional arguments after flow name
-7. Implement variable substitution in user prompts
-8. Add config validation logic
-9. Implement config loading with merging (user config + local config)
-10. Create Makefile with install, build, setup-config targets
-11. Test each flow independently
-12. Update config.example.yaml with flow examples
-
-## Further Considerations
-1. **Multi-file support**: Currently single-file only. Could extend to directory scanning later.
-2. **Streaming responses**: Could add streaming for better UX on long responses.
-3. **Diff preview**: Instead of writing directly, show a diff of changes before applying.
-4. **Flow templates**: Predefine common flow patterns for users to customize.
-5. **Flow validation**: Validate flow arguments before execution.
-6. **Prompt templating**: Enhance variable substitution with conditionals and loops.

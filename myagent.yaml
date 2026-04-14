@@ -4,7 +4,7 @@ api_key: test-key-123
 base_url: http://192.168.88.12:8001/v1
 
 logging:
-  level: debug
+  level: info
 
 common_system_prompt: |
   You are an AI assistant.
@@ -183,6 +183,7 @@ flows:
       - grep
       - list_dir
       - edit_file
+      - create_file
     arguments:
       - name: include_context
         description: "Whether to include full file context (optional, defaults to false)"

@@ -24,8 +24,32 @@ impl ValidPath {
         let canonical_path = if Path::new(path).exists() {
             Path::new(path).canonicalize()
                 .map_err(|e| format!("Cannot canonicalize path '{}': {}", path, e))?
+        } else if Path::new(path).is_absolute() {
+            // For non-existent absolute paths, find the deepest existing ancestor
+            // and append the remaining path components
+            let mut current = Path::new(path);
+            while !current.exists() {
+                if let Some(parent) = current.parent() {
+                    current = parent;
+                } else {
+                    break;
+                }
+            }
+            let existing_ancestor = if current.exists() {
+                current.canonicalize().map_err(|e| format!("Cannot canonicalize '{}': {}", current.display(), e))?
+            } else {
+                // Fallback: use the base itself
+                canonical_base.clone()
+            };
+            // Append the remaining path components from original path
+            let remaining: std::path::PathBuf = Path::new(path)
+                .strip_prefix(current)
+                .unwrap_or_else(|_| Path::new(path))
+                .components()
+                .collect();
+            existing_ancestor.join(remaining)
         } else {
-            // For non-existent paths, construct what the canonical path would be
+            // For non-existent relative paths, construct what the canonical path would be
             // by joining the canonical base with the relative path
             canonical_base.join(path)
         };

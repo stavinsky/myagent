@@ -3,11 +3,15 @@
 //! This module provides a collection of tools for:
 //! - Reading files
 //! - Editing files  
+//! - Creating files
+//! - Deleting files
 //! - Searching files with regex patterns
 //! - Listing directory contents
 //! - Executing custom shell commands
 
+pub mod create_file;
 pub mod custom_tools;
+pub mod delete_file;
 pub mod edit_file;
 pub mod git;
 pub mod grep;
@@ -15,6 +19,7 @@ pub mod list_dir;
 pub mod multi_select;
 pub mod read_file;
 pub mod registry;
+pub mod remove_dir;
 
 #[cfg(test)]
 mod tests {

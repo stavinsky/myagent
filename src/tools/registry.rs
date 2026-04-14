@@ -24,6 +24,9 @@ impl ToolRegistry {
         let mut handlers: Vec<Box<dyn ToolHandler>> = vec![
             Box::new(crate::tools::read_file::ReadFileHandler),
             Box::new(crate::tools::edit_file::EditFileHandler::new()),
+            Box::new(crate::tools::create_file::CreateFileHandler::new()),
+            Box::new(crate::tools::delete_file::DeleteFileHandler::new()),
+            Box::new(crate::tools::remove_dir::RemoveDirHandler::new()),
             Box::new(crate::tools::grep::GrepHandler),
             Box::new(crate::tools::list_dir::ListDirHandler),
             Box::new(crate::tools::multi_select::MultiSelectHandler),
