@@ -4,7 +4,8 @@ use anyhow::{Context, Result};
 use async_openai::{
     config::OpenAIConfig,
     types::{ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,
-            ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs, ChatCompletionTool},
+            ChatCompletionRequestUserMessageArgs, ChatCompletionRequestAssistantMessageArgs,
+            CreateChatCompletionRequestArgs, ChatCompletionTool},
     Client,
 };
 use serde_json::Value;
@@ -96,6 +97,14 @@ impl OpenAIClient {
                 
                 // Reset registry state before processing this batch
                 registry.reset_batch();
+                
+                // Add the assistant message with tool_calls to the conversation history
+                // This is required so the subsequent tool response messages can reference the tool_call.id
+                let assistant_msg = ChatCompletionRequestAssistantMessageArgs::default()
+                    .content(message.content.clone().unwrap_or_default())
+                    .tool_calls(message.tool_calls.clone().unwrap_or_default())
+                    .build()?;
+                messages.push(assistant_msg.into());
                 
                 // Process tool calls and add responses to messages
                 self.process_tool_calls(tool_calls, &mut messages, registry)
