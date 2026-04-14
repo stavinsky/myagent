@@ -1,5 +1,5 @@
 use std::fs;
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use tracing;
 use crate::types::{ToolResponse, ValidPath, ToolHandler};
 use serde_json::Value;
@@ -10,7 +10,6 @@ const MAX_LINES: usize = 2000;
 /// Get the tool definition for read_file
 pub fn get_tool_definition() -> ChatCompletionTool {
     ChatCompletionTool {
-        r#type: ChatCompletionToolType::Function,
         function: FunctionObject {
             name: "read_file".to_string(),
             description: Some(format!("Read the contents of a file by path with optional line range. Lines are numbered with the following format [<line-number>]<content>. Maximum {} lines are returned; larger requests are truncated.", MAX_LINES)),
@@ -32,7 +31,8 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["file_path"]
             })),
-        }
+            strict: None,
+        },
     }
 }
 
@@ -165,7 +165,7 @@ impl ToolHandler for ReadFileHandler {
         "read_file"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         get_tool_definition()
     }
 

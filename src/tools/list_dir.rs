@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::Path;
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use tracing;
 use crate::types::{ToolResponse, ValidPath, ToolHandler};
 use serde_json::Value;
@@ -8,7 +8,6 @@ use serde_json::Value;
 /// Get the tool definition for list_dir
 pub fn get_tool_definition() -> ChatCompletionTool {
     ChatCompletionTool {
-        r#type: ChatCompletionToolType::Function,
         function: FunctionObject {
             name: "list_dir".to_string(),
             description: Some("List contents of a directory".to_string()),
@@ -22,7 +21,8 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["dir_path"]
             })),
-        }
+            strict: None,
+        },
     }
 }
 
@@ -108,7 +108,7 @@ impl ToolHandler for ListDirHandler {
         "list_dir"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         get_tool_definition()
     }
 

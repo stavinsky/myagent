@@ -6,6 +6,7 @@
 //! - Staging changes
 //! - Creating commits
 
+use async_openai::types::chat::ChatCompletionTool;
 use serde_json::{json, Value};
 use std::process::Command;
 use tracing;
@@ -365,7 +366,7 @@ impl ToolHandler for GitStatusHandler {
         "git_status"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         serde_json::from_value(get_git_status_tool_definition()).unwrap()
     }
 
@@ -383,7 +384,7 @@ impl ToolHandler for GitDiffHandler {
         "git_diff"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         serde_json::from_value(get_git_diff_tool_definition()).unwrap()
     }
 
@@ -402,7 +403,7 @@ impl ToolHandler for GitStageHandler {
         "git_stage"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         serde_json::from_value(get_git_stage_tool_definition()).unwrap()
     }
 
@@ -427,7 +428,7 @@ impl ToolHandler for GitCommitHandler {
         "git_commit"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         serde_json::from_value(get_git_commit_tool_definition()).unwrap()
     }
 
@@ -449,7 +450,7 @@ impl ToolHandler for GitLogHandler {
         "git_log"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         serde_json::from_value(get_git_log_tool_definition()).unwrap()
     }
 

@@ -3,9 +3,10 @@ use crate::types::Flow;
 use anyhow::{Context, Result};
 use async_openai::{
     config::OpenAIConfig,
-    types::{ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,
+    types::chat::{ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,
             ChatCompletionRequestUserMessageArgs, ChatCompletionRequestAssistantMessageArgs,
-            CreateChatCompletionRequestArgs, ChatCompletionTool},
+            ChatCompletionRequestToolMessageArgs, CreateChatCompletionRequestArgs, ChatCompletionTool,
+            ChatCompletionTools},
     Client,
 };
 use serde_json::Value;
@@ -72,7 +73,7 @@ impl OpenAIClient {
             let request = CreateChatCompletionRequestArgs::default()
                 .model(&self.config.model)
                 .messages(messages.clone())
-                .tools(tools)
+                .tools(tools.iter().map(|t| ChatCompletionTools::Function(t.clone())).collect::<Vec<ChatCompletionTools>>())
                 .build()?;
 
             tracing::debug!("Sending request to OpenAI");
@@ -127,24 +128,26 @@ impl OpenAIClient {
     /// Process tool calls and add responses to messages
     fn process_tool_calls(
         &self,
-        tool_calls: &[async_openai::types::ChatCompletionMessageToolCall],
+        tool_calls: &[async_openai::types::chat::ChatCompletionMessageToolCalls],
         messages: &mut Vec<ChatCompletionRequestMessage>,
         registry: &crate::tools::registry::ToolRegistry,
     ) -> Result<()> {
         for tool_call in tool_calls {
-            let function = &tool_call.function;
-            let arguments: Value = serde_json::from_str(&function.arguments)
-                .context("Failed to parse tool arguments")?;
-            
-            let tool_output = registry.execute_tool(&function.name, &arguments, &self.allowed_base);
-            
-            messages.push(
-                async_openai::types::ChatCompletionRequestToolMessageArgs::default()
-                    .content(tool_output)
-                    .tool_call_id(tool_call.id.clone())
-                    .build()?
-                    .into()
-            );
+            if let async_openai::types::chat::ChatCompletionMessageToolCalls::Function(tc) = tool_call {
+                let function = &tc.function;
+                let arguments: Value = serde_json::from_str(&function.arguments)
+                    .context("Failed to parse tool arguments")?;
+                
+                let tool_output = registry.execute_tool(&function.name, &arguments, &self.allowed_base);
+                
+                messages.push(
+                    ChatCompletionRequestToolMessageArgs::default()
+                        .content(tool_output)
+                        .tool_call_id(tc.id.clone())
+                        .build()?
+                        .into()
+                );
+            }
         }
         
         Ok(())

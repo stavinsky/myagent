@@ -3,7 +3,7 @@
 //! This module provides a flexible tool that allows executing predefined shell
 //! commands with post-processing (head/tail/filter) on the output.
 
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use serde_json::Value;
 use std::path::Path;
 use std::process::Stdio;
@@ -329,7 +329,6 @@ impl ToolHandler for CustomToolHandler {
 
     fn get_definition(&self) -> ChatCompletionTool {
         ChatCompletionTool {
-            r#type: ChatCompletionToolType::Function,
             function: FunctionObject {
                 name: self.name.clone(),
                 description: Some(self.description.clone()),
@@ -353,6 +352,7 @@ impl ToolHandler for CustomToolHandler {
                     },
                     "additionalProperties": false
                 })),
+                strict: None,
             },
         }
     }

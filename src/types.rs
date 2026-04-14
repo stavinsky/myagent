@@ -13,7 +13,7 @@ pub trait ToolHandler: Send + Sync {
     fn name(&self) -> &str;
     
     /// Get the tool definition for OpenAI
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool;
+    fn get_definition(&self) -> async_openai::types::chat::ChatCompletionTool;
     
     /// Reset the tool's internal state for a new batch of tool calls
     /// This is called before processing a new batch of tool calls from the LLM

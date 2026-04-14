@@ -1,4 +1,4 @@
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use serde::{Deserialize, Serialize};
 
 use crate::types::{ToolResponse, ToolHandler};
@@ -17,7 +17,6 @@ pub struct SelectableItem {
 /// Get the tool definition for the multi_select tool
 pub fn get_tool_definition() -> ChatCompletionTool {
     ChatCompletionTool {
-        r#type: ChatCompletionToolType::Function,
         function: FunctionObject {
             name: "multi_select".to_string(),
             description: Some("Present a list of options to the user in a TUI with checkboxes. User can select multiple items using Space to toggle and Enter to confirm.".to_string()),
@@ -49,7 +48,8 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["question", "items", "question_type"]
             })),
-        }
+            strict: None,
+        },
     }
 }
 
@@ -120,7 +120,7 @@ impl ToolHandler for MultiSelectHandler {
         "multi_select"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         get_tool_definition()
     }
 
@@ -156,7 +156,6 @@ mod tests {
     #[test]
     fn test_tool_definition() {
         let def = get_tool_definition();
-        assert_eq!(def.r#type, async_openai::types::ChatCompletionToolType::Function);
         assert_eq!(def.function.name, "multi_select");
         assert!(def.function.parameters.is_some());
         

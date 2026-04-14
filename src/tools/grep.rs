@@ -1,7 +1,7 @@
 use globwalk::GlobWalkerBuilder;
 use regex::Regex;
 use std::fs;
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use tracing;
 use crate::types::{ToolResponse, ValidPath, ToolHandler};
 use serde_json::Value;
@@ -15,7 +15,6 @@ const MAX_FILES: usize = 100000;
 /// Get the tool definition for grep
 pub fn get_tool_definition() -> ChatCompletionTool {
     ChatCompletionTool {
-        r#type: ChatCompletionToolType::Function,
         function: FunctionObject {
             name: "grep".to_string(),
             description: Some(format!("Search files using a regex pattern. The path argument supports glob patterns for flexible file matching. Searches are limited to {} files and {} directory levels to prevent excessive resource usage.", MAX_FILES, MAX_DEPTH)),
@@ -33,7 +32,8 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["pattern"]
             })),
-        }
+            strict: None,
+        },
     }
 }
 
@@ -201,7 +201,7 @@ impl ToolHandler for GrepHandler {
         "grep"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         get_tool_definition()
     }
 

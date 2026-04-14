@@ -6,7 +6,7 @@
 use crate::config::CustomTool;
 use crate::types::ToolHandler;
 use serde_json::Value;
-use async_openai::types::ChatCompletionTool;
+use async_openai::types::chat::ChatCompletionTool;
 
 /// Centralized registry for all tool handlers
 pub struct ToolRegistry {

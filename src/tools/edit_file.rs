@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::Write;
 use std::sync::RwLock;
-use async_openai::types::{ChatCompletionTool, ChatCompletionToolType, FunctionObject};
+use async_openai::types::chat::{ChatCompletionTool, FunctionObject};
 use tracing;
 use crate::types::{ToolResponse, ValidPath, ToolHandler};
 use serde_json::Value;
@@ -9,7 +9,6 @@ use serde_json::Value;
 /// Get the tool definition for edit_file
 pub fn get_tool_definition() -> ChatCompletionTool {
     ChatCompletionTool {
-        r#type: ChatCompletionToolType::Function,
         function: FunctionObject {
             name: "edit_file".to_string(),
             description: Some("Edit a file by replacing a line range with new text. Lines are 1-indexed. Ranges are inclusive.".to_string()),
@@ -30,12 +29,13 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                     },
                     "new_text": {
                         "type": "string",
-                        "description": "The replacement text. To remove lines, set to empty string or the desired replacement."
+                        "description": "The new text to replace the specified line range with"
                     }
                 },
                 "required": ["file_path", "start_line", "end_line", "new_text"]
             })),
-        }
+            strict: None,
+        },
     }
 }
 
@@ -231,7 +231,7 @@ impl ToolHandler for EditFileHandler {
         "edit_file"
     }
 
-    fn get_definition(&self) -> async_openai::types::ChatCompletionTool {
+    fn get_definition(&self) -> ChatCompletionTool {
         get_tool_definition()
     }
 
