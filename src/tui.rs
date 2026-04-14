@@ -163,7 +163,7 @@ impl MultiSelectApp {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints(constraints)
-            .split(f.size());
+            .split(f.area());
 
         let header_text = format!("{} | Space: toggle, A: select all, V: view details, H: hide, Enter: confirm, q: quit", question);
         let header = Paragraph::new(header_text.as_str())
