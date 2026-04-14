@@ -21,7 +21,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["dir_path"]
             })),
-            strict: None,
+            strict: Some(true),
         },
     }
 }

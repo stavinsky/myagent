@@ -48,7 +48,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["question", "items", "question_type"]
             })),
-            strict: None,
+            strict: Some(true),
         },
     }
 }

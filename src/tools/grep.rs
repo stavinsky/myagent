@@ -32,7 +32,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["pattern"]
             })),
-            strict: None,
+            strict: Some(true),
         },
     }
 }

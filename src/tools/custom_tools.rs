@@ -352,7 +352,7 @@ impl ToolHandler for CustomToolHandler {
                     },
                     "additionalProperties": false
                 })),
-                strict: None,
+                strict: Some(true),
             },
         }
     }

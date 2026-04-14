@@ -34,7 +34,7 @@ pub fn get_tool_definition() -> ChatCompletionTool {
                 },
                 "required": ["file_path", "start_line", "end_line", "new_text"]
             })),
-            strict: None,
+            strict: Some(true),
         },
     }
 }
