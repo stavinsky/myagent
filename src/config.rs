@@ -196,10 +196,6 @@ impl Config {
         self.flows.get(name)
     }
 
-    pub fn list_flows(&self) -> Vec<&Flow> {
-        self.flows.values().collect()
-    }
-
     pub fn validate(&self) -> Result<Vec<String>> {
         let mut errors = Vec::new();
         
@@ -212,8 +208,9 @@ impl Config {
         }
         
         for (name, flow) in &self.flows {
-            if flow.name.is_empty() {
-                errors.push(format!("Flow '{}' has empty name", name));
+            // Validate flow key is snake_case
+            if !name.is_empty() && !name.chars().all(|c| c.is_lowercase() || c == '_' || c.is_ascii_digit()) {
+                errors.push(format!("Flow key '{}' must be snake_case (lowercase, numbers, underscores only)", name));
             }
             if flow.system_prompt.is_empty() {
                 errors.push(format!("Flow '{}' has empty system_prompt", name));

@@ -22,7 +22,6 @@ pub trait ToolHandler: Send + Sync {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Flow {
-    pub name: String,
     pub description: String,
     pub system_prompt: String,
     pub user_prompt: String,

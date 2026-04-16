@@ -74,8 +74,8 @@ async fn main() -> Result<()> {
 
     if args.list_flows || args.flow.is_none() {
         println!("Available flows:\n");
-        for flow in config.list_flows() {
-            println!("  {} - {}", flow.name, flow.description);
+        for (name, flow) in &config.flows {
+            println!("  {} - {}", name, flow.description);
             if !flow.arguments.is_empty() {
                 println!("    Arguments:");
                 for arg in &flow.arguments {
@@ -104,7 +104,7 @@ async fn main() -> Result<()> {
     let flow = config.get_flow(flow_name)
         .with_context(|| format!("Flow '{}' not found in config", flow_name))?;
 
-    println!("Executing flow: {} - {}", flow.name, flow.description);
+    println!("Executing flow: {} - {}", flow_name, flow.description);
     println!("Available tools: {}", flow.tools.join(", ")); 
     println!();
 
@@ -115,7 +115,7 @@ async fn main() -> Result<()> {
             if i + 1 < flow_args.len() {
                 flow_arguments.insert(arg_def.name.clone(), flow_args[i + 1].clone());
             } else {
-                anyhow::bail!("Missing required argument '{}' for flow '{}'", arg_def.name, flow.name);
+                anyhow::bail!("Missing required argument '{}' for flow '{}'", arg_def.name, flow_name);
             }
         } else if i + 1 < flow_args.len() {
             flow_arguments.insert(arg_def.name.clone(), flow_args[i + 1].clone());
@@ -169,7 +169,7 @@ async fn main() -> Result<()> {
     println!("{}", user_prompt);
     println!();
 
-    let result = client.execute_flow(flow, &user_prompt, &flow.tools).await?;
+    let result = client.execute_flow(flow_name, flow, &user_prompt, &flow.tools).await?;
 
     println!("Flow completed!");
     println!("{}", result);

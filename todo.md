@@ -16,4 +16,5 @@
  - end to end tests for each tool
  - edit_file 
      - handle /r/n  
-
+ - remove name field from config
+ 

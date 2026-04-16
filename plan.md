@@ -122,8 +122,7 @@ Flows are defined in config.yaml under the `flows` key. Each flow is a complete 
 ### Flow Structure
 ```yaml
 flows:
-  <flow-name>:
-    name: "<flow-name>"
+  <flow-name>:  # Must be snake_case (lowercase, numbers, underscores only)
     description: "<human-readable description>"
     system_prompt: |
       <system prompt for the model>
@@ -142,7 +141,6 @@ flows:
 ```yaml
 flows:
   review_and_fix:
-    name: "review_and_fix"
     description: "Review file and apply fixes"
     system_prompt: |
       You are a code review assistant. Analyze the file and provide suggestions for improvements.
@@ -167,7 +165,6 @@ flows:
 ### Example Flow: "commit_changes"
 ```yaml
   commit_changes:
-    name: "commit_changes"
     description: "Commit changes with AI-generated message"
     system_prompt: |
       You are a commit assistant. Analyze the git diff and create a meaningful commit message.

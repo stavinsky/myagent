@@ -28,7 +28,6 @@ common_system_prompt: |
 
 flows:
   review_and_fix:
-    name: "review_and_fix"
     description: "Review file and apply fixes"
     system_prompt: |
       You are a code reviewer and fixer.
@@ -77,7 +76,6 @@ flows:
         required: true
 
   commit_changes:
-    name: "commit_changes"
     description: "Commit changes with AI-generated message"
     system_prompt: |
       You are a commit assistant. Your job is to:
@@ -119,7 +117,6 @@ flows:
 
   commit_review:
     name: "commit_review"
-    description: "Review git changes and provide recommendations"
     system_prompt: |
       You are a code reviewer for pending git changes.
 
@@ -187,7 +184,6 @@ flows:
         required: false
 
   cleanup:
-    name: "cleanup"
     description: "Remove AI-generated comments and standardize documentation"
     system_prompt: |
       You are a code cleanup assistant. Your task is to:

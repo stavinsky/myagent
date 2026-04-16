@@ -35,8 +35,8 @@ impl OpenAIClient {
         Ok(Self { client, config, allowed_base })
     }
 
-    pub async fn execute_flow(&self, flow: &Flow, user_prompt: &str, available_tools: &[String]) -> Result<String> {
-        println!("Executing flow: {}", flow.name);
+    pub async fn execute_flow(&self, flow_name: &str, flow: &Flow, user_prompt: &str, available_tools: &[String]) -> Result<String> {
+        println!("Executing flow: {}", flow_name);
         tracing::info!("Flow description: {}", flow.description);
         tracing::info!("Available tools: {:?}", available_tools);
         tracing::info!("Custom tools: {:?}", self.config.custom_tools.keys());
@@ -45,7 +45,7 @@ impl OpenAIClient {
         let registry = crate::tools::registry::ToolRegistry::with_custom_tools(&self.config.custom_tools);
         let tools = registry.get_tools(available_tools);
         
-        tracing::debug!("Flow {} initialized with {} tools", flow.name, tools.len());
+        tracing::debug!("Flow {} initialized with {} tools", flow_name, tools.len());
         
         // Get the combined system prompt (common + flow-specific)
         let combined_system_prompt = self.config.get_combined_system_prompt(flow);
